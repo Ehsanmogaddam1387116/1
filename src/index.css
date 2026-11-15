@@ -1,0 +1,50 @@
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    font-family: 'Vazirmatn', system-ui, sans-serif;
+  }
+  body {
+    background-color: #f8fafc;
+    color: #1e293b;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-accent-500 hover:bg-accent-600 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-accent-500/30 active:scale-95;
+  }
+  .btn-secondary {
+    @apply bg-primary-800 hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 active:scale-95;
+  }
+  .btn-outline {
+    @apply border-2 border-primary-800 text-primary-800 hover:bg-primary-800 hover:text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 active:scale-95;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:shadow-primary-900/10 hover:-translate-y-1;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e3a5f;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #172a4d;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
