@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ShoppingCart, Star, Check, Truck, ShieldCheck, RotateCcw, ChevronLeft, Minus, Plus, Share2 } from 'lucide-react';
-import { getProductById, getCategoryById, getProductsByCategory, formatPrice } from '../data';
+import { getCategoryById, useProducts, formatPrice } from '../ProductsContext';
 import { useCart } from '../CartContext';
 import ProductCard from '../components/ProductCard';
 
@@ -10,6 +10,7 @@ type Props = {
 };
 
 export default function ProductDetailPage({ productId, onNavigate }: Props) {
+  const { getProductById, getProductsByCategory } = useProducts();
   const product = getProductById(productId);
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);

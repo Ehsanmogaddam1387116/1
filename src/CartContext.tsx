@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { CartItem } from './types';
-import { getProductById } from './data';
+import { useProducts } from './ProductsContext';
 
 type CartContextType = {
   items: CartItem[];
@@ -26,6 +26,7 @@ function loadCart(): CartItem[] {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { getProductById } = useProducts();
   const [items, setItems] = useState<CartItem[]>(loadCart);
 
   useEffect(() => {

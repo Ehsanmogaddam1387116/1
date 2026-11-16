@@ -1,6 +1,6 @@
 import { ArrowLeft, Truck, ShieldCheck, Headphones, CreditCard, Wrench, Zap, Flame, Scissors, Car } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { categories, getBestsellers } from '../data';
+import { categories, useProducts } from '../ProductsContext';
 import ProductCard from '../components/ProductCard';
 import { useState, useEffect } from 'react';
 
@@ -18,6 +18,7 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default function HomePage({ onNavigate }: Props) {
+  const { getBestsellers } = useProducts();
   const bestsellers = getBestsellers();
   const [currentSlide, setCurrentSlide] = useState(0);
 

@@ -1,6 +1,6 @@
 import { ShoppingCart, Star } from 'lucide-react';
 import type { Product } from '../types';
-import { formatPrice } from '../data';
+import { formatPrice } from '../ProductsContext';
 import { useCart } from '../CartContext';
 
 type Props = {

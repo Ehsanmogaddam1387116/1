@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { SlidersHorizontal, Search, X } from 'lucide-react';
-import { categories, products } from '../data';
+import { categories, useProducts } from '../ProductsContext';
 import ProductCard from '../components/ProductCard';
 
 type Props = {
@@ -11,6 +11,7 @@ type Props = {
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'rating';
 
 export default function ProductsPage({ onNavigate, initialCategory }: Props) {
+  const { products } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'all');
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [searchQuery, setSearchQuery] = useState('');

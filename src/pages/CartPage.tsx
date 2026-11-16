@@ -1,6 +1,7 @@
-import { Trash2, Minus, Plus, ShoppingCart, ArrowLeft, Check } from 'lucide-react';
+import { Trash2, Minus, Plus, ShoppingCart, ArrowLeft, Check, User, Phone, MapPin } from 'lucide-react';
 import { useCart } from '../CartContext';
-import { getProductById, formatPrice } from '../data';
+import { useProducts, formatPrice } from '../ProductsContext';
+import { supabase } from '../supabaseClient';
 import { useState } from 'react';
 
 type Props = {
@@ -9,10 +10,63 @@ type Props = {
 
 export default function CartPage({ onNavigate }: Props) {
   const { items, updateQuantity, removeFromCart, clearCart, totalItems, totalPrice } = useCart();
+  const { getProductById } = useProducts();
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [customer, setCustomer] = useState({ name: '', phone: '', address: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const shippingCost = totalPrice >= 2000000 || totalPrice === 0 ? 0 : 150000;
   const finalTotal = totalPrice + shippingCost;
+
+  const handleSubmitOrder = async () => {
+    if (!customer.name.trim() || !customer.phone.trim() || !customer.address.trim()) {
+      setError('لطفاً تمام فیلدها را پر کنید');
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          customer_name: customer.name,
+          customer_phone: customer.phone,
+          customer_address: customer.address,
+          total_amount: finalTotal,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      const orderItems = items.map((item) => {
+        const product = getProductById(item.productId);
+        return {
+          order_id: orderData.id,
+          product_id: item.productId,
+          product_name: product?.name || '',
+          product_image: product?.image || '',
+          price: product?.price || 0,
+          quantity: item.quantity,
+        };
+      });
+
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+      if (itemsError) throw itemsError;
+
+      clearCart();
+      setOrderPlaced(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'خطا در ثبت سفارش');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (orderPlaced) {
     return (
@@ -25,7 +79,7 @@ export default function CartPage({ onNavigate }: Props) {
           <p className="text-sm text-gray-500 mb-6 leading-6">
             از خرید شما سپاسگزاریم. سفارش شما در حال پردازش است و به زودی ارسال خواهد شد.
           </p>
-          <button onClick={() => { clearCart(); onNavigate('home'); }} className="btn-primary">
+          <button onClick={() => onNavigate('home')} className="btn-primary">
             بازگشت به صفحه اصلی
           </button>
         </div>
@@ -102,7 +156,6 @@ export default function CartPage({ onNavigate }: Props) {
                       </div>
 
                       <div className="flex items-end justify-between mt-auto">
-                        {/* Quantity */}
                         <div className="flex items-center border-2 border-gray-200 rounded-lg overflow-hidden">
                           <button
                             onClick={() => updateQuantity(item.productId, item.quantity - 1)}
@@ -150,6 +203,59 @@ export default function CartPage({ onNavigate }: Props) {
                 </button>
               </div>
             </div>
+
+            {/* Checkout form */}
+            {showCheckout && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 mt-6 animate-slide-down">
+                <h3 className="text-base font-bold text-gray-800 mb-4">اطلاعات تحویل</h3>
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 mb-4 text-sm">
+                    {error}
+                  </div>
+                )}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">نام و نام خانوادگی</label>
+                    <div className="relative">
+                      <User className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input
+                        type="text"
+                        value={customer.name}
+                        onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
+                        placeholder="نام خود را وارد کنید"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg pr-10 pl-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-400"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">شماره تماس</label>
+                    <div className="relative">
+                      <Phone className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input
+                        type="tel"
+                        value={customer.phone}
+                        onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
+                        placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg pr-10 pl-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-400"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">آدرس</label>
+                    <div className="relative">
+                      <MapPin className="absolute right-3 top-4 text-gray-400" size={18} />
+                      <textarea
+                        rows={3}
+                        value={customer.address}
+                        onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
+                        placeholder="آدرس کامل تحویل"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg pr-10 pl-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent-400 resize-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Order summary */}
@@ -187,12 +293,22 @@ export default function CartPage({ onNavigate }: Props) {
                 </div>
               </div>
 
-              <button
-                onClick={() => setOrderPlaced(true)}
-                className="w-full btn-primary mb-3"
-              >
-                ثبت سفارش
-              </button>
+              {showCheckout ? (
+                <button
+                  onClick={handleSubmitOrder}
+                  disabled={submitting}
+                  className="w-full btn-primary mb-3 disabled:opacity-50"
+                >
+                  {submitting ? 'در حال ثبت...' : 'تایید و ثبت سفارش'}
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowCheckout(true)}
+                  className="w-full btn-primary mb-3"
+                >
+                  ادامه و ثبت سفارش
+                </button>
+              )}
 
               <p className="text-[11px] text-gray-400 text-center leading-5">
                 با ثبت سفارش، شرایط خرید از ابزارسان را می‌پذیرید.
