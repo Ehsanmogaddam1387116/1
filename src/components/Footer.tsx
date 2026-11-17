@@ -1,4 +1,4 @@
-import { Wrench, Phone, Mail, MapPin, Instagram, Send, Facebook, Twitter, Clock } from 'lucide-react';
+import { Wrench, Phone, Mail, MapPin, Instagram, Send, Facebook, Twitter, Clock, Lock } from 'lucide-react';
 
 type Props = {
   onNavigate: (page: string) => void;
@@ -141,17 +141,11 @@ export default function Footer({ onNavigate }: Props) {
       {/* Bottom bar */}
       <div className="border-t border-primary-800/50">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-2">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3">
             <p className="text-xs text-primary-400">
               © ۱۴۰۵ ابزارسان - تمامی حقوق محفوظ است
             </p>
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => onNavigate('admin-login')}
-                className="text-[10px] text-primary-500 hover:text-accent-400 transition-colors"
-              >
-                پنل مدیریت
-              </button>
               <span className="text-xs text-primary-600">روش‌های پرداخت:</span>
               <div className="flex items-center gap-2">
                 <div className="bg-white/10 px-3 py-1 rounded text-[10px] font-semibold">شتاب</div>
@@ -160,6 +154,19 @@ export default function Footer({ onNavigate }: Props) {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Admin link - visible button */}
+      <div className="border-t border-primary-800/50 bg-primary-900/30">
+        <div className="container mx-auto px-4 py-3 text-center">
+          <button
+            onClick={() => onNavigate('admin-login')}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-accent-400 hover:text-accent-300 transition-colors"
+          >
+            <Lock size={16} />
+            پنل مدیریت
+          </button>
         </div>
       </div>
     </footer>

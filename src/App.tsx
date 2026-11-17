@@ -27,18 +27,34 @@ type Page =
   | 'admin-products'
   | 'admin-orders';
 
+function getPageFromHash(): Page {
+  const hash = window.location.hash.replace('#', '').split('/')[0];
+  const validPages: Page[] = [
+    'home', 'products', 'product', 'cart', 'about', 'contact',
+    'admin-login', 'admin-dashboard', 'admin-products', 'admin-orders',
+  ];
+  if (hash === 'admin') return 'admin-login';
+  return validPages.includes(hash as Page) ? (hash as Page) : 'home';
+}
+
 function App() {
-  const [page, setPage] = useState<Page>('home');
+  const [page, setPage] = useState<Page>(getPageFromHash);
   const [productId, setProductId] = useState<string | undefined>();
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    if (page === 'admin-login' || page === 'admin-dashboard' || page === 'admin-products' || page === 'admin-orders') {
-      setIsAdmin(isAdminAuthed());
-    }
-  }, [page]);
+    setIsAdmin(isAdminAuthed());
+  }, []);
+
+  useEffect(() => {
+    const onHashChange = () => setPage(getPageFromHash());
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   const navigate = (newPage: string, newProductId?: string) => {
+    const target = newPage === 'admin-login' ? 'admin' : newPage;
+    window.location.hash = target;
     setPage(newPage as Page);
     if (newProductId) setProductId(newProductId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -48,14 +64,16 @@ function App() {
     window.scrollTo({ top: 0 });
   }, [page]);
 
-  const isAdminPage = page === 'admin-login' || page === 'admin-dashboard' || page === 'admin-products' || page === 'admin-orders';
   const isAdminProtected = page === 'admin-dashboard' || page === 'admin-products' || page === 'admin-orders';
 
   // Admin login page - standalone, no storefront header/footer
   if (page === 'admin-login') {
     if (isAdmin) {
-      navigate('admin-dashboard');
-      return null;
+      return (
+        <AdminLayout onNavigate={navigate} currentPage="admin-dashboard" onLogout={() => setIsAdmin(false)}>
+          <AdminDashboard onNavigate={navigate} />
+        </AdminLayout>
+      );
     }
     return (
       <AdminLoginPage
