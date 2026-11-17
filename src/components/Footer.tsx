@@ -146,7 +146,13 @@ export default function Footer({ onNavigate }: Props) {
               © ۱۴۰۵ ابزارسان - تمامی حقوق محفوظ است
             </p>
             <div className="flex items-center gap-3">
-              <span className="text-xs text-primary-400">روش‌های پرداخت:</span>
+              <button
+                onClick={() => onNavigate('admin-login')}
+                className="text-[10px] text-primary-500 hover:text-accent-400 transition-colors"
+              >
+                پنل مدیریت
+              </button>
+              <span className="text-xs text-primary-600">روش‌های پرداخت:</span>
               <div className="flex items-center gap-2">
                 <div className="bg-white/10 px-3 py-1 rounded text-[10px] font-semibold">شتاب</div>
                 <div className="bg-white/10 px-3 py-1 rounded text-[10px] font-semibold">زرین‌پال</div>
